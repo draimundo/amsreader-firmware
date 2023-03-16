@@ -15,6 +15,8 @@ LNG::LNG(const char* payload, uint8_t useMeterType, MeterConfig* meterConfig, Da
         uint64_t o180 = 0, o280 = 0;
         uint64_t o181 = 0, o182 = 0;
         uint64_t o281 = 0, o282 = 0;
+        uint64_t o3170 = 0, o5170 = 0, o7170 = 0;
+        uint64_t o3270 = 0, o5270 = 0, o7270 = 0;
         LngObisDescriptor* descriptor = (LngObisDescriptor*) ptr;
         for(uint8_t x = 0;  x < h->arrayLength-1; x++) {
             ptr = (uint8_t*) &descriptor[1];
@@ -86,7 +88,40 @@ LNG::LNG(const char* payload, uint8_t useMeterType, MeterConfig* meterConfig, Da
                         if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %s (oct)", str);
                     }
                 }
+            } else if(descriptor->obis[2] == 31 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o3170 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o3170);
+                l1current = o3170;
+            } else if(descriptor->obis[2] == 32 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o3270 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o3270);
+                l1voltage = o3270;
+            } else if(descriptor->obis[2] == 51 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o5170 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o5170);
+                l2current = o5170;
+            } else if(descriptor->obis[2] == 52 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o5270 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o5270);
+                l2voltage = o5270;
+            } else if(descriptor->obis[2] == 71 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o7170 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o7170);
+                l3current = o7170;
+            } else if(descriptor->obis[2] == 72 && descriptor->obis[3] == 7 && descriptor->obis[4] == 0) {
+                o7270 = getNumber(item);
+                listType = listType >= 2 ? listType : 2;
+                if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf(" and value %lu", o7270);
+                l3voltage = o7270;
             }
+
+            threePhase = l1voltage > 0 && l2voltage > 0 && l3voltage > 0;
+	        twoPhase = (l1voltage > 0 && l2voltage > 0) || (l2voltage > 0 && l3voltage > 0) || (l3voltage > 0  && l1voltage > 0);
 
             if(debugger->isActive(RemoteDebug::VERBOSE)) debugger->printf("\n");
 
